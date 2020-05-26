@@ -8,7 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-
+//TODO checkeando git.
 public class Client {
     public static void main(String[] args) {
         try {
