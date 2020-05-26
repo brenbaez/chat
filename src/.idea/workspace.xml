@@ -65,10 +65,10 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.Server" />
+      <item itemvalue="Application.Dix" />
       <item itemvalue="Application.Maru" />
       <item itemvalue="Application.Santi" />
-      <item itemvalue="Application.Dix" />
+      <item itemvalue="Application.Server" />
       <item itemvalue="Application.test" />
     </list>
   </component>
