@@ -11,6 +11,7 @@ Server {
 
     private Map<String, Client> clients;
     private int port;
+
     public Server(int port) {
         this.port = port;
         this.clients = new HashMap<>();
@@ -25,6 +26,7 @@ Server {
     public void listen() {
         try {
             ServerSocket serverSocket = new ServerSocket(this.port);
+            //noinspection InfiniteLoopStatement
             while (true) {
                 Socket s = serverSocket.accept();
                 new Thread(new Client(s, this)).start();
@@ -38,33 +40,28 @@ Server {
         if (this.clients.containsKey(userName)) {
             return false;
         }
-        this.clients.values().forEach(
-                c -> c.addUser(userName)
-        );
-        this.clients.keySet().forEach(
-                i->client.addUser(i)
-        );
+        this.clients.values().forEach(c -> c.addUser(userName));
+        //noinspection Convert2MethodRef
+        this.clients.keySet().forEach(i -> client.addUser(i));
         this.clients.put(userName, client);
         return true;
     }
 
     public synchronized void removeUser(String userName) {
         this.clients.remove(userName);
-        this.clients.values().forEach(
-                c -> c.removeUser(userName)
-        );
+        this.clients.values().forEach(c -> c.removeUser(userName));
     }
 
     public synchronized void sendGeneralMsg(String userName, String text) {
         this.clients.entrySet().parallelStream().
-                filter( e -> !e.getKey().equals(userName)).
-                forEach( e -> e.getValue().sendGeneralMsg(userName, text));
+                filter(e -> !e.getKey().equals(userName)).
+                forEach(e -> e.getValue().sendGeneralMsg(userName, text));
     }
 
     //TODO agregamos esto (mejorar)
     public synchronized void sendPrivateMsg(String userName, String to, String text) {
         this.clients.entrySet().parallelStream().
-                filter( e-> e.getKey().equals(to)).
-                forEach(e->e.getValue().sendPrivateMsg(userName, to, text));
+                filter(e -> e.getKey().equals(to)).
+                forEach(e -> e.getValue().sendPrivateMsg(userName, to, text));
     }
 }

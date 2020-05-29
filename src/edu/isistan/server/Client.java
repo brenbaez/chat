@@ -26,12 +26,13 @@ public class Client implements Runnable {
             byte type = dis.readByte();
             if (type == Protocol.HANDSHAKE) {
                 userName = dis.readUTF();
-                if(!this.server.addClient(userName, this)) {
+                if (!this.server.addClient(userName, this)) {
                     userName = null;
                     s.close();
                     return;
                 }
             }
+            //noinspection InfiniteLoopStatement
             while (true) {
                 type = dis.readByte();
                 switch (type) {
@@ -49,7 +50,7 @@ public class Client implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if(userName!=null) {
+            if (userName != null) {
                 this.server.removeUser(userName);
             }
         }
@@ -59,7 +60,7 @@ public class Client implements Runnable {
         try {
             this.dos.writeByte(Protocol.REMOVE_USER);
             this.dos.writeUTF(userName);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
     }
@@ -68,7 +69,7 @@ public class Client implements Runnable {
         try {
             this.dos.writeByte(Protocol.ADD_USER);
             this.dos.writeUTF(userName);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
     }
@@ -78,7 +79,7 @@ public class Client implements Runnable {
             dos.writeByte(Protocol.GENERAL_MSG);
             dos.writeUTF(userName);
             dos.writeUTF(text);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
     }
@@ -89,7 +90,7 @@ public class Client implements Runnable {
             dos.writeUTF(userName);
             dos.writeUTF(to);
             dos.writeUTF(text);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
 
     }

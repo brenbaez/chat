@@ -18,7 +18,7 @@ public class Callback implements IChat {
         try {
             dos.writeByte(Protocol.GENERAL_MSG);
             dos.writeUTF(text);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
     }
@@ -29,7 +29,7 @@ public class Callback implements IChat {
             dos.writeByte(Protocol.PRIVATE_MSG);
             dos.writeUTF(to);
             dos.writeUTF(text);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
     }
