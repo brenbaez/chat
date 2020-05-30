@@ -40,14 +40,12 @@ public class Client implements Runnable {
                         String text = dis.readUTF();
                         this.server.sendGeneralMsg(userName, text);
                         break;
-                        //TODO agregamos esto
                     case (Protocol.PRIVATE_MSG):
                         String to = dis.readUTF();
                         text = dis.readUTF();
                         this.server.sendPrivateMsg(userName, to, text);
                         break;
                 }
-                //TODO implementar el resto del protocolo
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -86,11 +84,10 @@ public class Client implements Runnable {
         }
     }
 
-    public void sendPrivateMsg(String userName, String to, String text) {
+    public void sendPrivateMsg(String userName, String text) {
         try {
             dos.writeByte(Protocol.PRIVATE_MSG);
             dos.writeUTF(userName);
-            dos.writeUTF(to);
             dos.writeUTF(text);
         } catch (IOException ignored) {
         }

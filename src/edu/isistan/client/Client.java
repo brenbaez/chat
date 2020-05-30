@@ -36,12 +36,9 @@ public class Client {
                                 break;
                             case (Protocol.PRIVATE_MSG):
                                 user = dis.readUTF();
-                                dis.readUTF();
                                 text = dis.readUTF();
                                 gui.addNewMsg(user, text);
                                 break;
-                            default:
-                                System.out.println("intente entrar no pude");
                         }
 
                     }

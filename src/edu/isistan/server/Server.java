@@ -27,7 +27,7 @@ public class Server {
     public void listen() {
         try {
             ServerSocket serverSocket = new ServerSocket(this.port);
-            Executor executor = Executors.newCachedThreadPool();
+            Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket s = serverSocket.accept();
@@ -43,7 +43,9 @@ public class Server {
         if (this.clients.containsKey(userName)) {
             return false;
         }
+        // Les avisa a los demas que yo me acabo de conectar
         this.clients.values().forEach(c -> c.addUser(userName));
+        // Me avisa a mi quienes estan conectados
         //noinspection Convert2MethodRef
         this.clients.keySet().forEach(i -> client.addUser(i));
         this.clients.put(userName, client);
@@ -61,10 +63,7 @@ public class Server {
                 forEach(e -> e.getValue().sendGeneralMsg(userName, text));
     }
 
-    //TODO agregamos esto (mejorar)
     public void sendPrivateMsg(String userName, String to, String text) {
-        this.clients.entrySet().parallelStream().
-                filter(e -> e.getKey().equals(to)).
-                forEach(e -> e.getValue().sendPrivateMsg(userName, to, text));
+        this.clients.get(to).sendPrivateMsg(userName, text);
     }
 }
