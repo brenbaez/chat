@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class
 Server {
@@ -26,10 +28,12 @@ Server {
     public void listen() {
         try {
             ServerSocket serverSocket = new ServerSocket(this.port);
+            Executor executor = Executors.newCachedThreadPool();
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket s = serverSocket.accept();
-                new Thread(new Client(s, this)).start();
+                executor.execute(()-> new Client(s, this).run());
+//                new Thread(new Client(s, this)).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
