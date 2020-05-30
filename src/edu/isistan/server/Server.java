@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class
-Server {
+public class Server {
 
     private Map<String, Client> clients;
     private int port;
@@ -32,7 +31,7 @@ Server {
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket s = serverSocket.accept();
-                executor.execute(()-> new Client(s, this).run());
+                executor.execute(() -> new Client(s, this).run());
 //                new Thread(new Client(s, this)).start();
             }
         } catch (IOException e) {
@@ -40,7 +39,7 @@ Server {
         }
     }
 
-    public synchronized boolean addClient(String userName, Client client) {
+    public boolean addClient(String userName, Client client) {
         if (this.clients.containsKey(userName)) {
             return false;
         }
@@ -51,19 +50,19 @@ Server {
         return true;
     }
 
-    public synchronized void removeUser(String userName) {
+    public void removeUser(String userName) {
         this.clients.remove(userName);
         this.clients.values().forEach(c -> c.removeUser(userName));
     }
 
-    public synchronized void sendGeneralMsg(String userName, String text) {
+    public void sendGeneralMsg(String userName, String text) {
         this.clients.entrySet().parallelStream().
                 filter(e -> !e.getKey().equals(userName)).
                 forEach(e -> e.getValue().sendGeneralMsg(userName, text));
     }
 
     //TODO agregamos esto (mejorar)
-    public synchronized void sendPrivateMsg(String userName, String to, String text) {
+    public void sendPrivateMsg(String userName, String to, String text) {
         this.clients.entrySet().parallelStream().
                 filter(e -> e.getKey().equals(to)).
                 forEach(e -> e.getValue().sendPrivateMsg(userName, to, text));

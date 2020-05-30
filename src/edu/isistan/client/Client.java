@@ -9,7 +9,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-//TODO checkeando git.
 public class Client {
     public static void main(String[] args) {
         try {
@@ -30,7 +29,6 @@ public class Client {
                                 user = dis.readUTF();
                                 gui.removeUser(user);
                                 break;
-
                             case (Protocol.GENERAL_MSG):
                                 user = dis.readUTF();
                                 String text = dis.readUTF();
@@ -38,7 +36,7 @@ public class Client {
                                 break;
                             case (Protocol.PRIVATE_MSG):
                                 user = dis.readUTF();
-                                String to = dis.readUTF();
+                                dis.readUTF();
                                 text = dis.readUTF();
                                 gui.addNewMsg(user, text);
                                 break;
