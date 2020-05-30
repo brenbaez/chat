@@ -9,13 +9,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+//TODO checkeando git.
 public class Client {
     public static void main(String[] args) {
         try {
             Socket s = new Socket(args[0], 6663);
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
             ChatGUI gui = MainWindows.launchOrGet(new Callback(dos));
-            new Thread(()-> {
+            new Thread(() -> {
                 try {
                     DataInputStream dis = new DataInputStream(s.getInputStream());
                     while (true) {
@@ -41,8 +42,8 @@ public class Client {
                                 text = dis.readUTF();
                                 gui.addNewMsg(user, text);
                                 break;
-                                default:
-                                    System.out.println("intente entrar no pude");
+                            default:
+                                System.out.println("intente entrar no pude");
                         }
 
                     }
