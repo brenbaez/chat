@@ -3,54 +3,52 @@ package edu.isistan.client;
 import edu.isistan.chat.ChatGUI;
 import edu.isistan.chat.gui.MainWindows;
 import edu.isistan.common.Protocol;
+import edu.isistan.common.errorhandler.ConflictException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static edu.isistan.client.OperationClientFactory.operationFactory;
 
 public class Client {
+
+    public static final String FAILED_TO_OBTAIN_INPUT_STREAM_CODE = "Failed to obtain input stream code: {0}";
+
     public static void main(String[] args) {
         try {
             Socket s = new Socket(args[0], 6663);
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
             ChatGUI gui = MainWindows.launchOrGet(new Callback(dos));
-            new Thread(() -> {
-                try {
-                    DataInputStream dis = new DataInputStream(s.getInputStream());
-                    while (true) {
-                        byte type = dis.readByte();
-                        switch (type) {
-                            case (Protocol.ADD_USER):
-                                String user = dis.readUTF();
-                                gui.addUser(user);
-                                break;
-                            case (Protocol.REMOVE_USER):
-                                user = dis.readUTF();
-                                gui.removeUser(user);
-                                break;
-                            case (Protocol.GENERAL_MSG):
-                                user = dis.readUTF();
-                                String text = dis.readUTF();
-                                gui.addNewGeneralMsg(user, text);
-                                break;
-                            case (Protocol.PRIVATE_MSG):
-                                user = dis.readUTF();
-                                text = dis.readUTF();
-                                gui.addNewMsg(user, text);
-                                break;
-                        }
-
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.exit(0);
-                }
-            }).start();
+            startChat(s, gui);
             dos.writeByte(Protocol.HANDSHAKE);
             dos.writeUTF(args[1]);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private static void startChat(Socket s, ChatGUI gui) {
+        new Thread(() -> {
+            try {
+                DataInputStream dis = new DataInputStream(s.getInputStream());
+                while (true) {
+                    byte type = dis.readByte();
+                    operationFactory(gui, dis, type);
+
+                }
+            } catch (IOException e) {
+                throw new ConflictException(MessageFormat.format(FAILED_TO_OBTAIN_INPUT_STREAM_CODE, 1));
+            }
+        }).start();
+    }
+
+
 }
