@@ -10,11 +10,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static edu.isistan.client.OperationClientFactory.operationFactory;
 
@@ -42,7 +37,6 @@ public class Client {
                 while (true) {
                     byte type = dis.readByte();
                     operationFactory(gui, dis, type);
-
                 }
             } catch (IOException e) {
                 throw new ConflictException(MessageFormat.format(FAILED_TO_OBTAIN_INPUT_STREAM_CODE, 1));

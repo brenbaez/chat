@@ -1,11 +1,16 @@
 package edu.isistan.server;
 
+import edu.isistan.client.OperationClientFactory;
 import edu.isistan.common.Protocol;
+import edu.isistan.common.errorhandler.ConflictException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class Client implements Runnable {
     private Socket s;
@@ -24,28 +29,11 @@ public class Client implements Runnable {
             DataInputStream dis = new DataInputStream(this.s.getInputStream());
             dos = new DataOutputStream(this.s.getOutputStream());
             byte type = dis.readByte();
-            if (type == Protocol.HANDSHAKE) {
-                userName = dis.readUTF();
-                if (!this.server.addClient(userName, this)) {
-                    userName = null;
-                    s.close();
-                    return;
-                }
-            }
+            if (!connectUser(dis, type)) return;
             //noinspection InfiniteLoopStatement
             while (true) {
                 type = dis.readByte();
-                switch (type) {
-                    case (Protocol.GENERAL_MSG):
-                        String text = dis.readUTF();
-                        this.server.sendGeneralMsg(userName, text);
-                        break;
-                    case (Protocol.PRIVATE_MSG):
-                        String to = dis.readUTF();
-                        text = dis.readUTF();
-                        this.server.sendPrivateMsg(userName, to, text);
-                        break;
-                }
+                operationFactory(dis, type);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,6 +41,50 @@ public class Client implements Runnable {
             if (userName != null) {
                 this.server.removeUser(userName);
             }
+        }
+    }
+
+    public boolean connectUser(DataInputStream dis, byte type) throws IOException {
+        if (type == Protocol.HANDSHAKE) {
+            userName = dis.readUTF();
+            if (!this.server.addClient(userName, this)) {
+                userName = null;
+                s.close();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void operationFactory(DataInputStream dis, byte type) {
+        createMapFactory(dis).get(type).accept(server);
+    }
+
+    private Map<Byte, Consumer<Server>> createMapFactory(DataInputStream dis) {
+        Map<Byte, Consumer<Server>> operationFactory = new HashMap<>();
+        operationFactory.put(Protocol.GENERAL_MSG, server -> generalMsg(dis));
+        operationFactory.put(Protocol.PRIVATE_MSG, server -> privateMsg(dis));
+        return operationFactory;
+    }
+
+    private void generalMsg(DataInputStream dis) {
+        try {
+            String text = dis.readUTF();
+            server.sendGeneralMsg(userName, text);
+
+        } catch (IOException e) {
+            throw new ConflictException(OperationClientFactory.GENERAL_MSG_FAILED);
+        }
+    }
+
+    private void privateMsg(DataInputStream dis) {
+        try {
+            String to = dis.readUTF();
+            String text = dis.readUTF();
+            server.sendPrivateMsg(userName, to, text);
+
+        } catch (IOException e) {
+            throw new ConflictException(OperationClientFactory.PRIVATE_MSG_FAILED);
         }
     }
 

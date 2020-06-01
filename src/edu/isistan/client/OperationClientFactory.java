@@ -13,10 +13,13 @@ import static edu.isistan.common.Protocol.*;
 
 public class OperationClientFactory {
 
-    public static void operationFactory(ChatGUI gui, DataInputStream dis, byte type){
+    public static final String PRIVATE_MSG_FAILED = "private msg failed";
+    public static final String GENERAL_MSG_FAILED = "general msg failed";
+    public static final String REMOVE_USER_FAILED = "remove user failed";
+    public static final String ADD_USER_FAILED = "add user failed";
 
+    public static void operationFactory(ChatGUI gui, DataInputStream dis, byte type) {
         createMapFactory(dis).get(type).accept(gui);
-
     }
 
     private static Map<Byte, Consumer<ChatGUI>> createMapFactory(DataInputStream dis) {
@@ -38,10 +41,9 @@ public class OperationClientFactory {
             String user = dis.readUTF();
             String text = dis.readUTF();
             gui.addNewMsg(user, text);
-            gui.addNewGeneralMsg(user, text);
 
         } catch (IOException e) {
-            throw new ConflictException("private msg failed"); // TODO: 5/31/2020 meter en constantes
+            throw new ConflictException(PRIVATE_MSG_FAILED);
         }
 
     }
@@ -53,8 +55,7 @@ public class OperationClientFactory {
             gui.addNewGeneralMsg(user, text);
 
         } catch (IOException e) {
-            throw new ConflictException("general msg failed");
-
+            throw new ConflictException(GENERAL_MSG_FAILED);
         }
     }
 
@@ -64,7 +65,7 @@ public class OperationClientFactory {
             gui.removeUser(user);
 
         } catch (IOException e) {
-            throw new ConflictException("remove user failed");
+            throw new ConflictException(REMOVE_USER_FAILED);
         }
     }
 
@@ -72,8 +73,9 @@ public class OperationClientFactory {
         try {
             String user = dis.readUTF();
             gui.addUser(user);
+
         } catch (IOException e) {
-            throw new ConflictException("add user failed");
+            throw new ConflictException(ADD_USER_FAILED);
         }
     }
 }

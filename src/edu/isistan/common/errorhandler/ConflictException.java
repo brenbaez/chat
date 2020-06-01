@@ -1,10 +1,9 @@
 package edu.isistan.common.errorhandler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConflictException extends RuntimeException{
+public class ConflictException extends RuntimeException {
 
     private List<String> errors = new ArrayList<>();
 
