@@ -1,16 +1,13 @@
 package edu.isistan.server;
 
-import edu.isistan.client.OperationClientFactory;
 import edu.isistan.common.Protocol;
-import edu.isistan.common.errorhandler.ConflictException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
+
+import static edu.isistan.server.OperationServerClientFactory.operationServerFactory;
 
 public class Client implements Runnable {
     private Socket s;
@@ -33,7 +30,7 @@ public class Client implements Runnable {
             //noinspection InfiniteLoopStatement
             while (true) {
                 type = dis.readByte();
-                operationFactory(dis, type);
+                operationServerFactory(dis, type, server, userName);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,38 +51,6 @@ public class Client implements Runnable {
             }
         }
         return true;
-    }
-
-    public void operationFactory(DataInputStream dis, byte type) {
-        createMapFactory(dis).get(type).accept(server);
-    }
-
-    private Map<Byte, Consumer<Server>> createMapFactory(DataInputStream dis) {
-        Map<Byte, Consumer<Server>> operationFactory = new HashMap<>();
-        operationFactory.put(Protocol.GENERAL_MSG, server -> generalMsg(dis));
-        operationFactory.put(Protocol.PRIVATE_MSG, server -> privateMsg(dis));
-        return operationFactory;
-    }
-
-    private void generalMsg(DataInputStream dis) {
-        try {
-            String text = dis.readUTF();
-            server.sendGeneralMsg(userName, text);
-
-        } catch (IOException e) {
-            throw new ConflictException(OperationClientFactory.GENERAL_MSG_FAILED);
-        }
-    }
-
-    private void privateMsg(DataInputStream dis) {
-        try {
-            String to = dis.readUTF();
-            String text = dis.readUTF();
-            server.sendPrivateMsg(userName, to, text);
-
-        } catch (IOException e) {
-            throw new ConflictException(OperationClientFactory.PRIVATE_MSG_FAILED);
-        }
     }
 
     public void removeUser(String userName) {
