@@ -31,7 +31,8 @@ public class Server {
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket s = serverSocket.accept();
-                executor.execute(() -> new Client(s, this).run());
+                //executor.execute(() -> new Client(s, this).run());
+                executor.execute(new Client(s, this));
 //                new Thread(new Client(s, this)).start();
             }
         } catch (IOException e) {
