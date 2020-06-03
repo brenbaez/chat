@@ -1,5 +1,8 @@
 package edu.isistan.server;
 
+import edu.isistan.common.MessageError;
+import edu.isistan.common.errorhandler.ConflictException;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -31,12 +34,10 @@ public class Server {
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket s = serverSocket.accept();
-                //executor.execute(() -> new Client(s, this).run());
                 executor.execute(new Client(s, this));
-//                new Thread(new Client(s, this)).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ConflictException(MessageError.PUERTO_INACCESIBLE);
         }
     }
 
@@ -65,6 +66,10 @@ public class Server {
     }
 
     public void sendPrivateMsg(String userName, String to, String text) {
-        this.clients.get(to).sendPrivateMsg(userName, text);
+        this.clients.entrySet().parallelStream()
+                .filter(e -> e.getKey().equals(to))
+                .findFirst()
+                .ifPresent(e -> e.getValue().sendPrivateMsg(userName, text));
+//                forEach(e->e.getValue().sendPrivateMsg(userName, text));
     }
 }

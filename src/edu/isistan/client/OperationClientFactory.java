@@ -9,16 +9,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static edu.isistan.common.Protocol.*;
+import static edu.isistan.common.MessageError.ADD_USER_FAILED;
+import static edu.isistan.common.MessageError.GENERAL_MSG_FAILED;
+import static edu.isistan.common.MessageError.PRIVATE_MSG_FAILED;
+import static edu.isistan.common.MessageError.REMOVE_USER_FAILED;
+import static edu.isistan.common.Protocol.ADD_USER;
+import static edu.isistan.common.Protocol.GENERAL_MSG;
+import static edu.isistan.common.Protocol.PRIVATE_MSG;
+import static edu.isistan.common.Protocol.REMOVE_USER;
 
 public class OperationClientFactory {
 
-    public static final String PRIVATE_MSG_FAILED = "private msg failed";
-    public static final String GENERAL_MSG_FAILED = "general msg failed";
-    public static final String REMOVE_USER_FAILED = "remove user failed";
-    public static final String ADD_USER_FAILED = "add user failed";
-
-    public static void operationFactory(ChatGUI gui, DataInputStream dis, byte type) {
+    public static void operationFactory(ChatGUI gui, DataInputStream dis) throws IOException {
+        byte type = dis.readByte();
         createMapFactory(dis).get(type).accept(gui);
     }
 

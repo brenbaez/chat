@@ -1,15 +1,19 @@
 package edu.isistan.server;
 
 import edu.isistan.common.Protocol;
+import edu.isistan.common.errorhandler.ConflictException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 
+import static edu.isistan.common.MessageError.DATA_STREAM_ERROR;
 import static edu.isistan.server.OperationServerClientFactory.operationServerFactory;
 
 public class Client implements Runnable {
+
     private Socket s;
     private Server server;
     private DataOutputStream dos;
@@ -23,22 +27,25 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            DataInputStream dis = new DataInputStream(this.s.getInputStream());
-            dos = new DataOutputStream(this.s.getOutputStream());
+            DataInputStream dis = getDataStream();
             byte type = dis.readByte();
             if (!connectUser(dis, type)) return;
             //noinspection InfiniteLoopStatement
-            while (true) {
-                type = dis.readByte();
-                operationServerFactory(dis, type, server, userName);
-            }
+            while (true)
+                operationServerFactory(dis, server, userName);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ConflictException(DATA_STREAM_ERROR);
         } finally {
-            if (userName != null) {
+            if (Objects.nonNull(userName)) {
                 this.server.removeUser(userName);
             }
         }
+    }
+
+    private DataInputStream getDataStream() throws IOException {
+        DataInputStream dis = new DataInputStream(this.s.getInputStream());
+        dos = new DataOutputStream(this.s.getOutputStream());
+        return dis;
     }
 
     public boolean connectUser(DataInputStream dis, byte type) throws IOException {
@@ -88,6 +95,5 @@ public class Client implements Runnable {
             dos.writeUTF(text);
         } catch (IOException ignored) {
         }
-
     }
 }

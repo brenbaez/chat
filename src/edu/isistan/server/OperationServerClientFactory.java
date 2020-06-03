@@ -1,6 +1,5 @@
 package edu.isistan.server;
 
-import edu.isistan.client.OperationClientFactory;
 import edu.isistan.common.Protocol;
 import edu.isistan.common.errorhandler.ConflictException;
 
@@ -10,9 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static edu.isistan.common.MessageError.GENERAL_MSG_FAILED;
+import static edu.isistan.common.MessageError.PRIVATE_MSG_FAILED;
+
 public class OperationServerClientFactory {
 
-    public static void operationServerFactory(DataInputStream dis, byte type, Server server, String userName) {
+    public static void operationServerFactory(DataInputStream dis, Server server, String userName) throws IOException {
+        byte type = dis.readByte();
         createMapFactory(dis, userName).get(type).accept(server);
     }
 
@@ -29,7 +32,7 @@ public class OperationServerClientFactory {
             server.sendGeneralMsg(userName, text);
 
         } catch (IOException e) {
-            throw new ConflictException(OperationClientFactory.GENERAL_MSG_FAILED);
+            throw new ConflictException(GENERAL_MSG_FAILED);
         }
     }
 
@@ -40,7 +43,7 @@ public class OperationServerClientFactory {
             server.sendPrivateMsg(userName, to, text);
 
         } catch (IOException e) {
-            throw new ConflictException(OperationClientFactory.PRIVATE_MSG_FAILED);
+            throw new ConflictException(PRIVATE_MSG_FAILED);
         }
     }
 }
